@@ -1,4 +1,5 @@
 import sqlite3
+from sqlite3 import Error
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
@@ -6,8 +7,6 @@ from .models import User
 from . import db
 
 auth = Blueprint('auth', __name__)
-
-get_user = f"""SELECT email FROM user WHERE email = {login}"""
 
 @auth.route('/login')
 def login():
@@ -31,14 +30,7 @@ def signup_post():
         password = request.form.get('password')
 
        #user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
-       #user = db.session.query.filter(email == email)
-        user = None
-        connection = sqlite3.connect("~/Desktop/flask_auth_app/project/db.sqlite")
-	#print("connected to bd")
-        cursor = connection.cursor()
-	user = cursor.execute(get_user)
-	#print("got user")
-	connection.commit()
+        user = db.session.query.filter(email == email)
         if user: # if a user is found, we want to redirect back to signup page so user can try again
             flash('Email address already exists')
             return redirect(url_for('auth.signup'))
@@ -61,13 +53,7 @@ def login_post():
     remember = True if request.form.get('remember') else False
 
     #user = User.query.filter_by(email=email).first()
-    #user = db.session.query.filter(email == email)
-    user = None 
-    connection = sqlite3.connect("~/Desktop/flask_auth_app/project/db.sqlite")
-    #print("connected to bd")
-    cursor = connection.cursor()
-    user = cursor.execute(get_user)
-    #print("got user")
+    user = db.session.query.filter(email == email)
 
     # check if the user actually exists
     # take the user-supplied password, hash it, and compare it to the hashed password in the database
